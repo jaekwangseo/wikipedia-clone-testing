@@ -25,12 +25,12 @@ describe('Page model', function () {
     });
 
     describe('route', function () {
-      it('returns the url_name prepended by "/wiki/"', function() {
+      xit('returns the url_name prepended by "/wiki/"', function() {
         expect(page.route).to.equal('/wiki/' + page.urlTitle);
       });
     });
     describe('renderedContent', function () {
-      it('converts the markdown-formatted content into HTML', function() {
+      xit('converts the markdown-formatted content into HTML', function() {
         expect(marked(page.content)).to.equal('<h1 id="h1">H1</h1>\n');
       });
     });
@@ -51,7 +51,7 @@ describe('Page model', function () {
         })
       });
 
-      it('gets pages with the search tag', function() {
+      xit('gets pages with the search tag', function() {
         return Page.findByTag('foo')
         .then(function(pages) {
 
@@ -63,7 +63,7 @@ describe('Page model', function () {
         });
       });
 
-      it('does not get pages without the search tag', function() {
+      xit('does not get pages without the search tag', function() {
         return Page.findByTag('notfoo')
         .then(function(pages) {
           expect(pages).to.have.lengthOf(0);
@@ -106,7 +106,7 @@ describe('Page model', function () {
 
 
     describe('findSimilar', function () {
-      it('never gets itself', function(done) {
+      xit('never gets itself', function(done) {
         //console.log(page2);
         let findAry;
 
@@ -122,7 +122,7 @@ describe('Page model', function () {
         })
       });
 
-      it('gets other pages with any common tags', function(done) {
+      xit('gets other pages with any common tags', function(done) {
         let findAry;
 
         page1.findSimilar().then( function(similarAry) {
@@ -138,7 +138,7 @@ describe('Page model', function () {
       });
 
 
-      it('does not get other pages without any common tags', function(done) {
+      xit('does not get other pages without any common tags', function(done) {
         let findAry;
 
         page3.findSimilar().then( function(similarAry) {
@@ -164,7 +164,7 @@ describe('Page model', function () {
       });
     });
 
-    it('errors without title', function() {
+    xit('errors without title', function() {
       return page.validate().then(function(validatedPage) {
 
         expect(validatedPage).to.haveOwnProperty('message');
@@ -175,7 +175,7 @@ describe('Page model', function () {
 
     });
 
-    it('errors without content', function() {
+    xit('errors without content', function() {
       return page.validate().then(function(validatedPage) {
 
         expect(validatedPage).to.haveOwnProperty('message');
@@ -186,7 +186,7 @@ describe('Page model', function () {
 
       });
     });
-    it('errors given an invalid status', function() {
+    xit('errors given an invalid status', function() {
 
 
       return page.validate().then(function(validatedPage) {
@@ -219,7 +219,7 @@ describe('Page model', function () {
       })
     });
 
-    it('it sets urlTitle based on title before validating', function() {
+    xit('it sets urlTitle based on title before validating', function() {
 
       expect(page1.urlTitle).to.equal('this_is_title');
 
