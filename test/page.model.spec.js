@@ -2,6 +2,8 @@ const chai = require('chai');
 const spies = require('chai-spies');
 const expect = chai.expect;
 chai.use(spies);
+chai.should();
+chai.use(require('chai-things'));
 let Page = require('../models/index.js').Page;
 var marked = require('marked');
 
@@ -56,15 +58,15 @@ describe('Page model', function () {
           let aryLength = function(ary) {
             return ary.length;
           }
-          
-          expect(aryLength(pages)).to.be.equal(1);  
+
+          expect(aryLength(pages)).to.be.equal(1);
         });
       });
 
       it('does not get pages without the search tag', function() {
         return Page.findByTag('notfoo')
         .then(function(pages) {
-          expect(pages).to.have.lengthOf(0);  
+          expect(pages).to.have.lengthOf(0);
         });
       });
 
@@ -72,7 +74,7 @@ describe('Page model', function () {
   });
 
   describe('Instance methods', function () {
-    
+
     let page1, page2, page3;
     beforeEach( function() {
       return Page.sync({force: true}).then( function() {
@@ -96,7 +98,7 @@ describe('Page model', function () {
             });
         }).then( function(page) {
           page3 = page;
-        })
+        });
       })
       //return Promise.all([page1, page2, page3])
     })
@@ -135,19 +137,93 @@ describe('Page model', function () {
         })
       });
 
-      
-      it('does not get other pages without any common tags');
+
+      it('does not get other pages without any common tags', function(done) {
+        let findAry;
+
+        page3.findSimilar().then( function(similarAry) {
+          findAry = similarAry;
+        }).then( function() {
+          console.log(findAry.length);
+          expect(findAry).to.have.lengthOf(0);
+          //expect(findAry[0]).to.contain(page2);
+        })
+        .then( function() {
+          done();
+        })
+      });
     });
   });
 
   describe('Validations', function () {
-    it('errors without title');
-    it('errors without content');
-    it('errors given an invalid status');
+
+    let page;
+    beforeEach(function() {
+      page = Page.build({
+        status: 'nothing'
+      });
+    });
+
+    it('errors without title', function() {
+      return page.validate().then(function(validatedPage) {
+
+        expect(validatedPage).to.haveOwnProperty('message');
+        expect(validatedPage.name).to.equal('SequelizeValidationError');
+        expect(validatedPage.errors[0].message).to.equal('title cannot be null');
+
+      });
+
+    });
+
+    it('errors without content', function() {
+      return page.validate().then(function(validatedPage) {
+
+        expect(validatedPage).to.haveOwnProperty('message');
+        expect(validatedPage.name).to.equal('SequelizeValidationError');
+        //expect(validatedPage.errors[2].message).to.equal('content cannot be null');
+        validatedPage.errors.should.include.something.that.deep.equals({message: 'content cannot be null', type: 'notNull Violation', path: 'content',
+       value: null});
+
+      });
+    });
+    it('errors given an invalid status', function() {
+
+
+      return page.validate().then(function(validatedPage) {
+        console.log(validatedPage);
+        expect(validatedPage).to.haveOwnProperty('message');
+        expect(validatedPage.name).to.equal('SequelizeValidationError');
+        //expect(validatedPage.errors[2].message).to.equal('content cannot be null');
+        validatedPage.errors.should.include.something.that.deep.equals({message: 'content cannot be null', type: 'notNull Violation', path: 'content',
+       value: null});
+
+      });
+    });
   });
 
   describe('Hooks', function () {
-    it('it sets urlTitle based on title before validating');
+
+    let createPromise;
+    let page1;
+    beforeEach( function(done) {
+      Page.sync({force: true}).then( function() {
+        return Page.create({
+          title: 'this is title',
+          content: '# H1',
+          tags: ['foo', 'bar']
+        });
+
+      }).then( function(pageValid) {
+        page1 = pageValid;
+        done();
+      })
+    });
+
+    it('it sets urlTitle based on title before validating', function() {
+
+      expect(page1.urlTitle).to.equal('this_is_title');
+
+    });
   });
 
 });
