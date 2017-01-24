@@ -20,7 +20,7 @@ router.get('/', function (req, res, next) {
 
 // POST /wiki
 router.post('/', function (req, res, next) {
-
+    //console.log('body: ',req.body);
     User.findOrCreate({
         where: {
             email: req.body.authorEmail,
@@ -78,7 +78,9 @@ router.get('/:urlTitle', function (req, res, next) {
         .then(function (page) {
 
             if (page === null) {
-                return next(new Error('That page was not found!'));
+                let err = new Error('That page was not found!');
+                err.statusCode = 404;
+                return next(err);
             }
 
             return page.getAuthor()

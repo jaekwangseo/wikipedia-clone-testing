@@ -28,8 +28,11 @@ app.get('/', function (req, res) {
 });
 
 app.use(function (err, req, res, next) {
-    console.error(err);
-    res.status(500).send(err.message);
+    //console.error(err);
+    if(!err.statusCode) {
+        err.statusCode = 500;
+    }
+    res.status(err.statusCode).send(err.message);
 });
 
 module.exports = app;
