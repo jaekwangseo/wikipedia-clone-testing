@@ -5,6 +5,7 @@ chai.use(spies);
 let Page = require('../models/index.js').Page;
 var marked = require('marked');
 
+
 describe('Page model', function () {
 
 
@@ -18,8 +19,7 @@ describe('Page model', function () {
         content: '# H1'
       });
 
-      console.log('page:', page);
-      //done();
+      //console.log('page:', page);
     });
 
     describe('route', function () {
@@ -36,40 +36,106 @@ describe('Page model', function () {
 
   describe('Class methods', function () {
 
-
-
     describe('findByTag', function () {
-
-      let page;
-      beforeEach( function() {
-
-        return Page.create({
-          title: 'this is title',
-          content: '# H1',
-          tags: ['foo', 'bar']
-        });
+      beforeEach( function(done) {
+        Page.sync({force: true}).then( function() {
+          return Page.create({
+            title: 'this is title',
+            content: '# H1',
+            tags: ['foo', 'bar']
+          });
+        }).then( function() {
+          done();
+        })
       });
 
-      it('gets pages with the search tag', function(done) {
-        Page.findById('foo')
+      it('gets pages with the search tag', function() {
+        return Page.findByTag('foo')
         .then(function(pages) {
-          console.log('pages: ', pages);
-          expect(pages.length).to.be(1);
-          done();
+
+          let aryLength = function(ary) {
+            return ary.length;
+          }
+          
+          expect(aryLength(pages)).to.be.equal(1);  
         });
       });
 
       it('does not get pages without the search tag', function() {
-
+        return Page.findByTag('notfoo')
+        .then(function(pages) {
+          expect(pages).to.have.lengthOf(0);  
+        });
       });
 
     });
   });
 
   describe('Instance methods', function () {
+    
+    let page1, page2, page3;
+    beforeEach( function() {
+      return Page.sync({force: true}).then( function() {
+        return Page.create({
+            title: 'Page1',
+            content: 'Page1 Content',
+            tags: ['foo', 'bar']
+          }).then( function(page) {
+            page1 = page;
+            return Page.create({
+            title: 'Page2',
+            content: 'Page2 Content',
+            tags: ['foo', 'notbar']
+          })
+          }).then( function(page) {
+            page2 = page;
+            return Page.create({
+            title: 'Page3',
+            content: 'Page3 Content',
+            tags: ['foofoo', 'barbar']
+            });
+        }).then( function(page) {
+          page3 = page;
+        })
+      })
+      //return Promise.all([page1, page2, page3])
+    })
+
+
+
     describe('findSimilar', function () {
-      it('never gets itself');
-      it('gets other pages with any common tags');
+      it('never gets itself', function(done) {
+        //console.log(page2);
+        let findAry;
+
+        page1.findSimilar().then( function(similarAry) {
+          findAry = similarAry;
+        }).then( function() {
+          console.log(findAry.length);
+          expect(findAry).to.have.lengthOf(1);
+          //expect(findAry[0]).to.contain(page2);
+        })
+        .then( function() {
+          done();
+        })
+      });
+
+      it('gets other pages with any common tags', function(done) {
+        let findAry;
+
+        page1.findSimilar().then( function(similarAry) {
+          findAry = similarAry;
+        }).then( function() {
+          console.log(findAry.length);
+          expect(findAry).to.have.lengthOf(1);
+          //expect(findAry[0]).to.contain(page2);
+        })
+        .then( function() {
+          done();
+        })
+      });
+
+      
       it('does not get other pages without any common tags');
     });
   });
